@@ -1,0 +1,21 @@
+
+
+a = load '/user/cloudera/agegroup.dat' using PigStorage('\t') as (age:int,cat:chararray);
+
+b = load '/user/hive/warehouse/mydb.db/census/000000_0' using PigStorage(',') as (age:int, education:chararray,ms:chararray,gender:chararray,taxfiler:chararray,income:double,parents:chararray,cob:chararray,citizenship:chararray,weeks:int);
+
+ c = foreach b generate income,age;
+ d = foreach a generate cat,age;
+
+ e = join  c by age,d by age ;
+
+f = foreach e generate cat,income;
+
+g = group f by cat;
+
+h = foreach g generate group,SUM(f.income)/COUNT(f.income) as pci;
+
+dump h;
+
+
+

@@ -1,0 +1,143 @@
+
+----------------------------------------Project on Census Data=======> Finance---------------------------------------------
+
+
+
+
+=================== MySql=============================
+create database mydb;
+use mydb;
+
+create table tax_mapping(income double,taxper double);
+
+
+====================for transfering the file from usb to local .... 
+-- Device --- select usb (for pendrive)
+
+
+=================Goto Hove================
+
+create table census_jsdata(jsndata string)
+row format delimited
+stored as textfile;
+
+
+load data local inpath '/home/cloudera/Desktop/data_census/sample.dat' into table census_jsdata;
+
+
+=======census  table in hive
+
+create table census(age int,education string,maritalstatus string,gender string,taxfilerstatus string,income double,parents string,cob string,citizenship string,weeksworked int)
+    > row format delimited
+    > fields terminated by ','
+    > stored as textfile; 
+
+
+=    insert  the record from census_jsdata table into census table in hive   ==============
+insert overwrite table census
+select get_json_object(jsndata,"$.Age"),get_json_object(jsndata,"$.Education"),get_json_object(jsndata,"$.MaritalStatus"),get_json_object(jsndata,"$.Gender"),get_json_object(jsndata,"$.TaxFilerStatus"),get_json_object(jsndata,"$.Income"),get_json_object(jsndata,"$.Parents"),get_json_object(jsndata,"$.CountryOfBirth"),get_json_object(jsndata,"$.Citizenship"),get_json_object(jsndata,"$.WeeksWorked") from census_jsdata;
+
+
+
+==================take output file in hadoop===============
+hive> insert overwrite  directory '/data_census'  select * from  census;
+
+
+=============Now go to mysql ===========
+
+before inserting record add primary key on income field of tax_mapping table:
+mysql> alter table tax_mapping add constraint pk_income_key primary key(income);
+--------------------------------------------------------------------------------------------------------
+
+
+--- insert some records into tax_mapping table;
+
+mysql> insert into tax_mapping(income,taxper) values(2001,10.0);
+Query OK, 1 row affected (0.11 sec)
+
+mysql> insert into tax_mapping(income,taxper) values(5001,15.0);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into tax_mapping(income,taxper) values(7501,20.0);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into tax_mapping(income,taxper) values(10001,30.0);
+Query OK, 1 row affected (0.00 sec)
+
+
+==========
+---- insert some record into age_mapping table...
+
+
+
+
+
+
+
+====================NOW WORK ON SQOOP==================
+---Retrieve the data from mysql
+
+//connect sqoop to mysql
+
+sudo cp /home/cloudera/Desktop/data_census/Sqoop/mysql-connector-java-5.1.34-bin.jar /usr/lib/sqoop/lib
+
+//import data at default location in hadoop(hdfs file system.......... /usr/cloudera)
+
+sqoop import --connect jdbc:mysql://localhost/financeDb  --username root --password cloudera --table tax_mapping 
+
+// import data at target location in hadoop (hdfs file system)
+
+sqoop import --connect jdbc:mysql://localhost/financeDb  --username root --password cloudera --table tax_mapping --target-dir /user/cloudera/tax_mapping_data --m 1
+
+
+--------------------- sqoop work finished.........
+
+
+
+
+
+==================================== 
+transfer the agegroup.dat file from local to hadoop............
+ hadoop fs -put /home/cloudera/Desktop/data_census/agegroup.dat /user/cloudera/
+
+
+================================================================================================ base completed
+
+census table------------- csv data           Hadoop         location: /user/hive/warehouse/mydb.db/census/000000_0
+tax_mapping--------------- mysql /           hadoop         location: /user/cloudera/tax_mapping_data/part-m-00000
+agegroup.dat                                 hadoop          location:  /user/cloudera/agegroup.dat   
+
+
+============================================================================================================================================
+=======================================Task Started======================================================  
+Task 1: Total Income Generated,
+
+Task 1: Per capital income: total income/total population 
+
+script: pci                            --  // run :   pig ~/Desktop/pci   
+
+Task 2: per capital income genderWise:         
+
+script: pci_gender                      -- // run :  pig  ~/Desktop/pci_gender
+
+Task 3; per capital income ageGroupWise
+
+script pci_Age                         -- // run : pig ~/Desktop/pci_Age
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
