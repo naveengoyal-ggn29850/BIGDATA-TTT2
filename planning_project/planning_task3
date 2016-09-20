@@ -1,0 +1,5 @@
+a = load '/user/hive/warehouse/mydb.db/census/' using PigStorage(',') as  (age:int,education:chararray,ms:chararray,gender:chararray);
+b = foreach a generate gender;
+c = group b by gender; 
+d = foreach c generate group,COUNT(b.gender); 
+dump d;

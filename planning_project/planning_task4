@@ -1,0 +1,23 @@
+
+
+ a = load '/user/hive/warehouse/mydb2.db/census/' using PigStorage(',') as  (age:int,education:chararray,ms:chararray,gender:chararray,taxfiler:chararray,income:double,parents:chararray,cob:chararray,citizenship:chararray);
+ b = foreach a generate citizenship;
+ c = group b all;
+d = foreach c generate 1 as flag,COUNT(b.citizenship) as total_count;
+
+--e = filter b by TRIM(citizenship)=='Foreign born- Not a citizen of U S' 
+
+e = filter b by (citizenship matches '.*Not a citizen.*');
+ 
+f = group e all;
+
+g = foreach f generate 1 as flag,COUNT(e.citizenship) as fore_count;
+
+h = join d by flag,g by flag;
+
+i = foreach h generate fore_count,total_count-fore_count;
+
+dump i;
+
+
+
