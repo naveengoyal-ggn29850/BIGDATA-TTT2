@@ -1,0 +1,43 @@
+hostname: db4free.net
+database: hadoop2323
+username: hadoop2323
+password: hadoop2323
+
+sudo cp mysql-connector-java-5.1.36/mysql-connector-java-5.1.36-bin.jar /usr/lib/sqoop/lib
+
+
+sqoop import --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --password hadoop2323 --table Employee   
+
+
+sqoop import --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --password hadoop2323 --query 'select max(AMT), UID from Hadoop_Data where $CONDITIONS group by UID' --target-dir /query_data --num-mappers 1
+
+
+sqoop import --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --password hadoop2323 --table Employee   
+
+
+
+sqoop import --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --P --table Employee 
+
+
+
+sqoop import --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --password hadoop2323 --table Employee --verbose --append
+
+
+
+sqoop import --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --password hadoop2323 --table Employee --verbose  --target-dir /myresult1234
+
+
+
+sqoop import --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --password hadoop2323 --table Employee --verbose  --target-dir /myresult1234 --columns "post_title" --where "id < 10" --num-mappers 1
+
+
+
+sqoop import --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --password hadoop2323 --table Employee --verbose  --target-dir /myresult1234 --columns "post_title,post_status" --where "id < 10" --num-mappers 1 --fields-terminated-by , --enclosed-by '\"' 
+
+
+
+sqoop import --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --password hadoop2323 --table Employee --verbose --columns "post_title,post_status" --where "id < 10" --num-mappers 1 --fields-terminated-by , --hive-import --hive-table abdata.myresult 
+
+
+
+sqoop export --connect jdbc:mysql://db4free.net/hadoop2323  --username hadoop2323 --password hadoop2323 --table ducat --export-dir /user/cloudera/scoop123  --update-key id
