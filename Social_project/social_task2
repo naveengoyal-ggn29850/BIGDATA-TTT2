@@ -1,0 +1,9 @@
+a = load '/user/hive/warehouse/mydb2.db/census/' using PigStorage(',') as  (age:int,education:chararray,ms:chararray,gender:chararray,taxfiler:chararray,income:double,parents:chararray,cob:chararray,citizenship:chararray,week:int);
+
+  b = foreach a generate parents;
+  c = filter b by TRIM(parents)!='Both parents present' ;
+  d = group c by parents;
+  e = foreach d generate group, COUNT(c.parents) as total_count;
+  dump e;
+  
+

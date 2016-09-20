@@ -1,0 +1,123 @@
+
+==================Social project===============
+
+============================================================= MySql===================================================================
+
+---------- need two support file
+=========pension_mapping
+========orphan_mapping
+
+create database socialDb;
+use socialDb;
+
+create table pension_mapping(pid int,min_income int,max_income int,pension int);
+mysql> insert into pension_mapping values(1,0,1000,500);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into pension_mapping values(2,1001,3000,750);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into pension_mapping values(3,3001,5000,1000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into pension_mapping values(4,5001,7500,1500);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into pension_mapping values(5,7501,10000,2500);
+Query OK, 1 row affected (0.00 sec)
+
++------+------------+------------+---------+
+| pid  | min_income | max_income | pension |
++------+------------+------------+---------+
+|    1 |          0 |       1000 |     500 |
+|    2 |       1001 |       3000 |     750 |
+|    3 |       3001 |       5000 |    1000 |
+|    4 |       5001 |       7500 |    1500 |
+|    5 |       7501 |      10000 |    2500 |
++------+------------+------------+---------+
+
+
+------------Create orphan_mapping Table----------------------
+
+create table orphan_mapping(oid int,parent_present varchar(33),subsidy int);
+
+mysql> insert into orphan_mapping values(1,'father',1000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into orphan_mapping values(2,'mother',2000);
+Query OK, 1 row affected (0.00 sec)
+
+mysql> insert into orphan_mapping values(3,'both',4000);
+Query OK, 1 row affected (0.00 sec)
+
++------+----------------+---------+
+| oid  | parent_present | subsidy |
++------+----------------+---------+
+|    1 | father         |    1000 |
+|    2 | mother         |    2000 |
+|    3 | both           |    4000 |
++------+----------------+---------+
+
+=========================================================SQOOP=========================================================
+
+sudo cp /home/cloudera/Desktop/file/Sqoop/mysql-connector-java-5.1.34-bin.jar /usr/lib/sqoop/lib
+
+--import pension_mapping table from mysql to hadoop
+sqoop import --connect jdbc:mysql://localhost/socialDb  --username root --password cloudera --table pension_mapping --target-dir /user/cloudera/pension_mapping_data --m 1
+
+---import orphan_mapping table from mysql to hadoop
+sqoop import --connect jdbc:mysql://localhost/socialDb  --username root --password cloudera --table orphan_mapping --target-dir /user/cloudera/orphan_mapping_data --m 1
+
+
+
+
+===============================================================================================
+=============================================Location==========================================
+===============================================================================================
+
+------pension_mapping :  /user/cloudera/pension_mapping_data/part-m-00000
+------census          :  /user/hive/warehouse/mydb.db/census/000000_0
+------orphan_mapping  :  /user/cloudera/orphan_mapping_data/part-m-00000
+
+==================================================================================================
+
+
+Task 1:  Calculate the total pension amout after x Year?       -----mapreduce
+
+         Social_task1
+
+Task 2: Calculate The total no of orphons Category Wise ? 
+
+         Social_task2
+
+
+       a = load '/user/hive/warehouse/mydb2.db/census/' using PigStorage(',') as  (age:int,education:chararray,ms:chararray,gender:chararray,taxfiler:chararray,income:double,parents:chararray,cob:chararray,citizenship:chararray,week:int);
+
+  b = foreach a generate parents;
+  c = filter b by TRIM(parents)!='Both parents present' ;
+  d = group c by parents;
+  e = foreach d generate group, COUNT(c.parents) as total_count;
+  dump e;
+  
+
+Task 3:  Calculate The Total no of widows and divorced by female categories?
+
+         Social_task3
+
+  
+  a = load '/user/hive/warehouse/mydb2.db/census/' using PigStorage(',') as  (age:int,education:chararray,ms:chararray,gender:chararray,taxfiler:chararray,income:double,parents:chararray,cob:chararray,citizenship:chararray,week:int);
+
+ b = filter a by TRIM(ms)=='Divorced' or TRIM(ms)=='Widowed';
+
+ c = filter b by TRIM(gender)=='Female';
+
+ d = group c by ms;
+ 
+ e = foreach d generate group,COUNT(c.ms) ;
+
+ dump e;
+
+
+ 
+
+

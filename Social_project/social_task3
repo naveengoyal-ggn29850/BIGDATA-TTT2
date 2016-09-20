@@ -1,0 +1,15 @@
+
+  a = load '/user/hive/warehouse/mydb2.db/census/' using PigStorage(',') as  (age:int,education:chararray,ms:chararray,gender:chararray,taxfiler:chararray,income:double,parents:chararray,cob:chararray,citizenship:chararray,week:int);
+
+ b = filter a by TRIM(ms)=='Divorced' or TRIM(ms)=='Widowed';
+
+ c = filter b by TRIM(gender)=='Female';
+
+ d = group c by ms;
+ 
+ e = foreach d generate group,COUNT(c.ms) ;
+
+ dump e;
+
+
+ 
