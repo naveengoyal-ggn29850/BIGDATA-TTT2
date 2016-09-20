@@ -1,0 +1,7 @@
+a = load '/user/hive/warehouse/mydb.db/census/000000_0' using PigStorage(',') as (age:chararray,education:chararray,ms:chararray,gender:chararray,taxpayer:chararray,income:double,parents:chararray,cob:chararray,citizen:chararray,weekworked:int);
+b = foreach a generate education,weekworked;
+c = filter b by weekworked>0;
+ d = group c by education;
+ e = foreach d generate group,COUNT(c.weekworked);
+dump e; 
+

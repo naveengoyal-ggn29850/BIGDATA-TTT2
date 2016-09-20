@@ -1,0 +1,105 @@
+
+==============================================================================================
+===========================================Education=========================================
+===============================================================================================
+
+
+task1:
+Education Qualification Count gender Wise:
+
+a = load '/user/hive/warehouse/mydb.db/census/000000_0' using PigStorage(',') as (age:chararray,education:chararray,ms:chararray,gender:chararray);
+b = foreach a generate education,gender;
+c = group b by (education,gender);
+d = foreach c generate group.education,group.gender,COUNT(b.gender);
+dump d;
+
+
+
+Solution:
+( Children, Male,228)
+( Children, Female,224)
+( 9th grade, Male,27)
+( 9th grade, Female,29)
+( 10th grade, Male,38)
+( 10th grade, Female,43)
+( 11th grade, Male,30)
+( 11th grade, Female,38)
+( 5th or 6th grade, Male,9)
+( 5th or 6th grade, Female,12)
+( 7th and 8th grade, Male,39)
+( 7th and 8th grade, Female,42)
+( Less than 1st grade, Male,7)
+( Less than 1st grade, Female,7)
+( High school graduate, Male,204)
+( High school graduate, Female,279)
+( 12th grade no diploma, Male,10)
+( 12th grade no diploma, Female,8)
+( 1st 2nd 3rd or 4th grade, Male,3)
+( 1st 2nd 3rd or 4th grade, Female,13)
+( Doctorate degree(PhD EdD), Male,10)
+( Doctorate degree(PhD EdD), Female,5)
+( Bachelors degree(BA AB BS), Male,107)
+( Bachelors degree(BA AB BS), Female,99)
+( Some college but no degree, Male,136)
+( Some college but no degree, Female,159)
+( Associates degree-academic program, Male,16)
+( Associates degree-academic program, Female,34)
+( Associates degree-occup /vocational, Male,30)
+( Associates degree-occup /vocational, Female,26)
+( Masters degree(MA MS MEng MEd MSW MBA), Male,33)
+( Masters degree(MA MS MEng MEd MSW MBA), Female,35)
+( Prof school degree (MD DDS DVM LLB JD), Male,12)
+( Prof school degree (MD DDS DVM LLB JD), Female,8)
+
+
+Task 2: Count the Educational Wise Employement?
+
+a = load '/user/hive/warehouse/mydb.db/census/000000_0' using PigStorage(',') as (age:chararray,education:chararray,ms:chararray,gender:chararray,taxpayer:chararray,income:double,parents:chararray,cob:chararray,citizen:chararray,weekworked:int);
+b = foreach a generate education,weekworked;
+c = filter b by weekworked>0;
+ d = group c by education;
+ e = foreach d generate group,COUNT(c.weekworked);
+dump e;
+
+
+Solution:
+
+( 9th grade,25)
+( 10th grade,37)
+( 11th grade,42)
+( 5th or 6th grade,12)
+( 7th and 8th grade,23)
+( Less than 1st grade,4)
+( High school graduate,350)
+( 12th grade no diploma,14)
+( 1st 2nd 3rd or 4th grade,7)
+( Doctorate degree(PhD EdD),13)
+( Bachelors degree(BA AB BS),181)
+( Some college but no degree,240)
+( Associates degree-academic program,41)
+( Associates degree-occup /vocational,47)
+( Masters degree(MA MS MEng MEd MSW MBA),58)
+( Prof school degree (MD DDS DVM LLB JD),17)
+
+
+
+
+
+
+
+
+
+Task 3:    calculate the total no of male and female?
+
+solution: 
+a = load '/user/hive/warehouse/mydb.db/census/' using PigStorage(',') as  (age:int,education:chararray,ms:chararray,gender:chararray);
+b = foreach a generate gender;
+c = group b by gender; 
+d = foreach c generate group,COUNT(b.gender); 
+dump d;
+
+( Male,939)
+( Female,1061)
+
+
+
